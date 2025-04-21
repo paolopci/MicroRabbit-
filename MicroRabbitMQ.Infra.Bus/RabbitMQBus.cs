@@ -82,27 +82,39 @@ namespace MicroRabbitMQ.Infra.Bus
 
         private void StartBasicConsume<T>() where T : Event
         {
+            // Crea una nuova istanza di ConnectionFactory con il nome host impostato su "localhost"
+            // e abilita l'elaborazione asincrona dei consumatori.
             var factory = new ConnectionFactory()
             {
                 HostName = "localhost",
                 DispatchConsumersAsync = true
             };
 
+            // Crea una connessione al server RabbitMQ utilizzando la factory.
             var connection = factory.CreateConnection();
+            // Crea un canale di comunicazione attraverso la connessione.
             var channel = connection.CreateModel();
             var eventName = typeof(T).Name;
+            // Dichiara una coda con il nome dell'evento. La coda non è durevole, non è esclusiva,
+            // non è auto-cancellata e non ha argomenti aggiuntivi.
             channel.QueueDeclare(eventName, false, false, false, null);
 
+            // Crea un consumatore asincrono per il canale.
             var consumer = new AsyncEventingBasicConsumer(channel);
 
+            // Registra un gestore per l'evento "Received" del consumatore. Questo gestore verrà
+            // eseguito ogni volta che un messaggio viene ricevuto nella coda.
             consumer.Received += Consumer_Received;
 
+            // Avvia il consumo dei messaggi dalla coda specificata. I messaggi vengono automaticamente
+            // riconosciuti come elaborati (auto-acknowledge) dopo essere stati ricevuti.
             channel.BasicConsume(eventName, true, consumer);
         }
 
         private async Task Consumer_Received(object sender, BasicDeliverEventArgs e)
         {
-            var eventName = e.RoutingKey;
+            // Ottiene il nome dell'evento dal corpo del messaggio ricevuto.
+            var eventName = e.RoutingKey; // Use RoutingKey instead of typeof(T).Name
             var message = Encoding.UTF8.GetString(e.Body.ToArray()); // Convert ReadOnlyMemory<byte> to byte[] using ToArray()
 
             try
@@ -111,7 +123,7 @@ namespace MicroRabbitMQ.Infra.Bus
             }
             catch (Exception ex)
             {
-
+                // Log or handle the exception as needed
             }
         }
 
