@@ -1,6 +1,7 @@
 ﻿
 using MicroRabbit.Banking.Application.Interfaces;
 using MicroRabbit.Banking.Application.Services;
+using MicroRabbit.Banking.Data.Context;
 using MicroRabbitMQ.Domain.Core.Bus;
 using MicroRabbitMQ.Infra.Bus;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,6 +20,7 @@ namespace MicroRabbit.Infra.IoC
 
             // Application Services
             services.AddTransient<IAccountServices, AccountService>();
-        }
+            services.AddTransient<BankingDbContext>();
+        } 
     }
 }
