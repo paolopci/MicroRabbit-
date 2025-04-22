@@ -14,7 +14,7 @@ namespace MicroRabbit.Banking.Application.Services
         }
         public IEnumerable<Account> GetAccounts()
         {
-            throw new NotImplementedException();
+           return _accountRepository.GetAccounts();
         }
     }
 }
